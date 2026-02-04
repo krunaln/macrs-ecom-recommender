@@ -1,0 +1,17 @@
+[project]
+name = "ecom-recomender"
+version = "0.1.0"
+description = ""
+requires-python = ">=3.12"
+dependencies = [
+  "alembic",
+  "langchain",
+  "langchain-community",
+  "langchain-groq",
+  "langgraph",
+  "pydantic",
+  "python-dotenv",
+  "psycopg2-binary",
+  "sqlalchemy",
+  "pgvector",
+]
