@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg/
+*.whl
+*.dist-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Env files
+.env
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Editor
+.vscode/
+.idea/
+
+# LangGraph / LangChain cache
+.langgraph/
+.langchain/
+
+# Data artifacts
+*.sqlite
+*.db
+*.pickle
+*.pkl
+
+# Model caches
+.cache/
