@@ -7,8 +7,7 @@ MACRS (Multi-Agent Conversational Recommender System) is a framework that coordi
 Reference paper: [A Multi-Agent Conversational Recommender System (MACRS)](https://arxiv.org/abs/2402.01135).
 
 ## Demo
-
-_Add a CLI demo video here (e.g., GIF or MP4 link)._ 
+[Demo](/demo.gif)
 
 This repo implements **auditable multi-agent systems** with:
 - parallel candidate generation (Ask / Recommend / Chit-chat) every turn
@@ -219,4 +218,4 @@ Planned MACRS-style evaluation:
 ---
 
 ## License
-TBD
+No license. This is just for education purposes only.
