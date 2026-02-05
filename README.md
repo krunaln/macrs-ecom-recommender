@@ -4,10 +4,10 @@ Production-minded implementation of a **MACRS-style** (Multi-Agent Conversationa
 
 **What is MACRS?**  
 MACRS (Multi-Agent Conversational Recommender System) is a framework that coordinates multiple specialized responder agents (ask / recommend / chit-chat) with a single planner and a user feedback-aware reflection mechanism. It emphasizes **dialogue policy quality**—deciding *when* to ask, recommend, or engage—over pure ranking accuracy.  
-Reference paper: [A Multi-Agent Conversational Recommender System (MACRS)](https://arxiv.org/abs/2402.01135).
+Reference paper: <a href="https://arxiv.org/abs/2402.01135" target="_blank">A Multi-Agent Conversational Recommender System (MACRS)</a>.
 
 ## Demo
-[Demo](/demo.gif)
+![Demo](/demo.gif)
 
 This repo implements **auditable multi-agent systems** with:
 - parallel candidate generation (Ask / Recommend / Chit-chat) every turn
@@ -132,7 +132,7 @@ File: `macrs/reflection.py`
 
 ## Retrieval / RAG Layer (External to the LLM)
 
-Products are ingested into PostgreSQL with pgvector embeddings and a full-text `tsv` index.
+Products are ingested into PostgreSQL with pgvector embeddings (generated via **Ollama** using `nomic-embed-text`) and a full-text `tsv` index.
 Retrieval is hybrid:
 - dense vector similarity (`pgvector`)
 - sparse full-text ranking (`ts_rank_cd`)
@@ -167,11 +167,13 @@ Files:
 | Variable | Purpose |
 |---|---|
 | `DATABASE_URL` | Postgres DSN for product DB |
-| `GROQ_API_KEY` | Groq API key for `ChatGroq` |
+| `GROQ_API_KEY` | Groq API key for `ChatGroq` (Groq Cloud) |
 | `MACRS_LLM_MODEL` | LLM model name (default: `openai/gpt-oss-20b`) |
 | `MACRS_USE_LLM` | Set to `0` to disable LLM calls (test mode) |
 
-See `.env.example`.
+**Model providers used**
+- **LLM inference**: Groq Cloud (`ChatGroq`) with `openai/gpt-oss-20b`
+- **Embeddings**: Ollama local embeddings with `nomic-embed-text`
 
 ### 2) Ingest Products
 
