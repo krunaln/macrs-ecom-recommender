@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from pgvector import Vector
 
 from scripts.db import get_conn
@@ -161,9 +161,6 @@ def search_products(
     model: str = "nomic-embed-text",
     base_url: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-    
-    print("query:", query)
-    
     return hybrid_search(
         query=query,
         k=k,

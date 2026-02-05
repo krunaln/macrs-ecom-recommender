@@ -23,7 +23,7 @@ class AskingAgent(BaseAgent):
             )
 
         prompts: List[AgentCandidate] = []
-        preferences = state.preferences
+        preferences = state.user_profile
 
         if not preferences.get("category"):
             prompts.append(
@@ -76,11 +76,14 @@ class AskingAgent(BaseAgent):
 
     def _llm_generate(self, user_message: str, state: ConversationState) -> AgentLLMOutput | None:
         prompt = (
-            "You are the Asking Agent in an e-commerce assistant. "
-            "Generate clarification questions to collect missing preferences. "
-            "User message: "
-            f"{user_message}\n"
-            f"Known preferences: {state.preferences}\n"
+            "You are the Asking Agent in an e-commerce assistant.\n"
+            "Goal: elicit missing preferences by asking concise questions.\n"
+            "Constraints: do NOT recommend items. Avoid repeating questions already asked.\n\n"
+            f"Dialogue history: {state.dialogue_history[-5:]}\n"
+            f"User message: {user_message}\n"
+            f"Known preferences: {state.user_profile}\n"
+            f"Browsing history: {state.browsing_history}\n"
+            f"Strategy suggestions: {state.agent_suggestions.get('ask', [])}\n"
             "Return 1-3 candidates."
         )
         return generate_structured_output(prompt, AgentLLMOutput)

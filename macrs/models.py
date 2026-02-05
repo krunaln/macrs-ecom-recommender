@@ -57,8 +57,24 @@ class PlannerDecision(BaseModel):
 class PlannerLLMOutput(BaseModel):
     selected_act: ActType
     selected_candidate_id: str
-    weight_updates: Dict[str, float] = Field(default_factory=dict)
     notes: Optional[str] = None
+
+
+class InfoReflectionOutput(BaseModel):
+    current_demand: Dict[str, Any] = Field(default_factory=dict)
+    browsing_history: List[str] = Field(default_factory=list)
+    notes: Optional[str] = None
+
+
+class StrategyReflectionOutput(BaseModel):
+    suggestions: Dict[str, List[str]] = Field(default_factory=dict)
+    corrective_experiences: List[str] = Field(default_factory=list)
+    error_summary: Optional[str] = None
+
+
+class FailureDetectionOutput(BaseModel):
+    failed: bool
+    reason: Optional[str] = None
 
 
 class ReflectionUpdate(BaseModel):

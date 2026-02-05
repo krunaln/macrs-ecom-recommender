@@ -40,10 +40,19 @@ class ChitChatAgent(BaseAgent):
 
     def _llm_generate(self, user_message: str, state: ConversationState) -> AgentLLMOutput | None:
         prompt = (
-            "You are the Chit-Chat Agent in an e-commerce assistant. "
-            "Keep the tone warm and concise while encouraging preference signals. "
+            "You are the Chit-Chat Agent in an e-commerce assistant.\n"
+            "Goal: keep the conversation light and engaging to elicit preferences.\n"
+            "Constraints:\n"
+            "- Do NOT recommend products.\n"
+            "- Do NOT list items or mention specific products.\n"
+            "- Do NOT ask direct clarification questions (leave that to the Asking Agent).\n"
+            "- You may express admiration for certain item attributes to guide preferences.\n"
+            "Use dialogue history and user profile to avoid repetition.\n\n"
+            f"Dialogue history: {state.dialogue_history[-5:]}\n"
             f"User message: {user_message}\n"
-            f"Known preferences: {state.preferences}\n"
+            f"Known preferences: {state.user_profile}\n"
+            f"Browsing history: {state.browsing_history}\n"
+            f"Strategy suggestions: {state.agent_suggestions.get('chitchat', [])}\n"
             "Return 1 candidate."
         )
         return generate_structured_output(prompt, AgentLLMOutput)

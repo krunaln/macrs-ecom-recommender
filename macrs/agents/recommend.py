@@ -42,10 +42,18 @@ class RecommendingAgent(BaseAgent):
     name = "recommending"
 
     def run(self, user_message: str, state: ConversationState) -> AgentOutput:
-        preferences = state.preferences
+        if not hasattr(self, "_last_products"):
+            self._last_products = []
+        preferences = state.user_profile
         query = self._build_query(user_message, preferences)
 
-        results = self._retrieve_products(user_message, preferences, query)
+        results = self._retrieve_products(user_message, preferences, query, state)
+        if not results and self._last_products:
+            results = self._last_products
+        elif not results and self._is_low_signal(user_message):
+            results = self._last_products
+        if results:
+            self._last_products = results
 
         products: List[ProductCandidate] = []
         for item in results:
@@ -68,7 +76,7 @@ class RecommendingAgent(BaseAgent):
                 )
             )
 
-        llm_output = self._llm_generate(user_message, preferences, products)
+        llm_output = self._llm_generate(user_message, preferences, products, state)
         if llm_output and llm_output.candidates:
             candidates = llm_output.candidates
             for idx, candidate in enumerate(candidates, start=1):
@@ -104,7 +112,25 @@ class RecommendingAgent(BaseAgent):
                 parts.append(str(value))
         return " ".join(parts).strip()
 
-    def _retrieve_products(self, user_message: str, preferences: Dict[str, Any], query: str) -> list[dict]:
+    def _is_low_signal(self, user_message: str) -> bool:
+        text = (user_message or "").strip().lower()
+        if not text or len(text) < 3:
+            return True
+        low = {
+            "no",
+            "nope",
+            "not sure",
+            "i dont know",
+            "i don't know",
+            "maybe",
+            "ok",
+            "okay",
+            "yes",
+            "sure",
+        }
+        return text in low
+
+    def _retrieve_products(self, user_message: str, preferences: Dict[str, Any], query: str, state: ConversationState) -> list[dict]:
         llm = get_llm()
         tools = [product_search]
         llm_with_tools = llm.bind_tools(tools)
@@ -117,8 +143,11 @@ class RecommendingAgent(BaseAgent):
         )
         human = HumanMessage(
             content=(
+                "You are the Recommending Agent. Use the product_search tool only.\n"
                 f"User message: {user_message}\n"
                 f"Known preferences: {preferences}\n"
+                f"Browsing history: {state.browsing_history}\n"
+                f"Strategy suggestions: {state.agent_suggestions.get('recommend', [])}\n"
                 f"Suggested query: {query}\n"
                 "Call product_search with the best parameters."
             )
@@ -136,11 +165,12 @@ class RecommendingAgent(BaseAgent):
 
         call = tool_calls[0]
         args = call.get("args", {})
-        logging.info("Executing product_search with args: %s", args)
+        logger = logging.getLogger("macrs.tool.product_search")
+        logger.info("call args=%s", args)
         start = time.perf_counter()
         results = product_search.invoke(args)
         elapsed = time.perf_counter() - start
-        logging.info("product_search returned %d results in %.2fs", len(results), elapsed)
+        logger.info("returned %d results in %.2fs", len(results), elapsed)
         return results
 
     def _format_response(self, products: List[ProductCandidate]) -> str:
@@ -158,6 +188,7 @@ class RecommendingAgent(BaseAgent):
         user_message: str,
         preferences: Dict[str, Any],
         products: List[ProductCandidate],
+        state: ConversationState,
     ) -> AgentLLMOutput | None:
         if not products:
             return None
@@ -177,8 +208,11 @@ class RecommendingAgent(BaseAgent):
             "Use the provided products (already ranked externally). "
             "Do not invent products or reorder them. "
             "Write a helpful response summarizing the top items. "
+            f"Dialogue history: {state.dialogue_history[-5:]}\n"
             f"User message: {user_message}\n"
             f"Known preferences: {preferences}\n"
+            f"Browsing history: {state.browsing_history}\n"
+            f"Strategy suggestions: {state.agent_suggestions.get('recommend', [])}\n"
             f"Products: {product_brief}\n"
             "Return 1-2 candidates."
         )

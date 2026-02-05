@@ -28,7 +28,7 @@ class TokenStreamHandler(BaseCallbackHandler):
 
 def get_llm(
     model: Optional[str] = None,
-    temperature: float = 0.2,
+    temperature: float = 0.5,
     timeout: Optional[int] = 30,
     streaming: bool = False,
     callbacks: Optional[List[BaseCallbackHandler]] = None,
@@ -68,7 +68,7 @@ def generate_structured_output(prompt: str, schema: Type[T], model: Optional[str
         start = time.perf_counter()
         response = llm.invoke([system, user])
         elapsed = time.perf_counter() - start
-        logging.info("LLM call completed in %.2fs", elapsed)
+        logging.getLogger("macrs.llm").info("LLM call completed in %.2fs", elapsed)
     except Exception as exc:
         logging.warning("LLM call failed: %s", exc)
         return None
